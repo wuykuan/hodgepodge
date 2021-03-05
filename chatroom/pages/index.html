@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室</title>
+    <style>
+    </style>
+</head>
+<body>
+    <input type="text" placeholder="请输入你的内容">
+    <button>发送请求</button>
+    <div></div>
+
+    <script>
+        const TYPE_ENTER = 0
+        const TYPE_LEAVE = 1
+        const TYPE_MSG   = 2
+        let input = document.querySelector('input')
+        let button = document.querySelector('button')
+        let div = document.querySelector('div')
+        let socket = new WebSocket('ws://localhost:3000')
+        socket.addEventListener('open', function() {
+            div.innerHTML = "连接服务器成功"
+        })
+
+        button.addEventListener('click',function(){
+            let value = input.value
+            socket.send(value)
+            input.value = ''
+        })
+        //接收websocket服务的数据
+        socket.addEventListener('message', function(e){
+            console.log(e.data);
+            let data = JSON.parse(e.data)
+            let dv = document.createElement('div')
+            dv.innerText = data.msg + '-----' + data.time
+            if(data.type === TYPE_ENTER){
+                dv.style.color = 'green'
+            }else if(data.type === TYPE_LEAVE){
+                dv.style.color = 'red'
+            }else{
+                dv.style.color = 'blue'
+            }
+            div.appendChild(dv)
+        })
+        socket.addEventListener('close', function(){
+            div.innerHTML = '服务器断开连接'
+        })
+    </script>
+</body>
+</html>
